@@ -1,0 +1,8 @@
+# Lanka POS: let the logged-in user print to USB receipt printers and use
+# USB-serial / Bluetooth (rfcomm) printers without root.
+# "uaccess" grants access to whoever is logged in at the machine, so the
+# file name must sort before 73-seat-late.rules.
+SUBSYSTEM=="usbmisc", KERNEL=="lp[0-9]*", TAG+="uaccess"
+SUBSYSTEM=="tty", KERNEL=="ttyUSB[0-9]*", TAG+="uaccess"
+SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", TAG+="uaccess"
+SUBSYSTEM=="tty", KERNEL=="rfcomm[0-9]*", TAG+="uaccess"

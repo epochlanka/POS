@@ -1,0 +1,33 @@
+{
+  "nav": { "pos": "Billing", "printer": "Printer test" },
+  "pos": {
+    "search": "Search or scan barcode",
+    "bill": "Bill",
+    "empty": "The bill is empty",
+    "inStock": "In stock: {{qty}}",
+    "lowStock": "Low stock",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "cashGiven": "Cash given",
+    "change": "Change",
+    "payCash": "Pay cash",
+    "payCard": "Card",
+    "payQr": "LankaQR",
+    "clear": "Clear",
+    "done": "Bill {{billNo}} saved",
+    "noResults": "No products found"
+  },
+  "printer": {
+    "title": "Printer test",
+    "intro": "Prints a sample English, Sinhala and Tamil receipt as an image.",
+    "scan": "Find printers",
+    "none": "No printers found.",
+    "paper": "Paper width",
+    "print": "Print test receipt",
+    "drawer": "Open cash drawer",
+    "printed": "Sent to printer",
+    "webOnly": "Printing works in the desktop and Android apps. In the browser you can see the preview only."
+  },
+  "receipt": { "thanks": "Thank you! Come again." },
+  "status": { "offline": "Offline: bills are saved on this device", "local": "Local only (cloud not set up)", "synced": "Synced", "syncing": "Syncing…" }
+}

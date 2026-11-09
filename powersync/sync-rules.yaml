@@ -1,0 +1,16 @@
+# PowerSync sync rules: each signed-in user receives the data of every shop
+# they are a member of. Paste into the PowerSync dashboard (or use with the
+# self-hosted service).
+#
+# TODO (Phase 2): sync only recent sales (e.g. last 90 days) to devices, and
+# serve older history from the server for reports.
+bucket_definitions:
+  shop_data:
+    parameters: SELECT shop_id FROM shop_members WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM products WHERE shop_id = bucket.shop_id
+      - SELECT * FROM product_variants WHERE shop_id = bucket.shop_id
+      - SELECT * FROM stock_movements WHERE shop_id = bucket.shop_id
+      - SELECT * FROM sales WHERE shop_id = bucket.shop_id
+      - SELECT * FROM sale_lines WHERE shop_id = bucket.shop_id
+      - SELECT * FROM sale_payments WHERE shop_id = bucket.shop_id

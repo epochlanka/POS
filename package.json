@@ -1,0 +1,104 @@
+{
+  "name": "lanka-pos",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:electron": "concurrently -k \"vite --strictPort\" \"wait-on tcp:5173 && npm run build:electron && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .\"",
+    "build": "tsc -b && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "dist:linux": "npm run build && npm run build:electron && electron-builder --linux",
+    "dist:win": "npm run build && npm run build:electron && electron-builder --win",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
+    "test": "vitest run",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@fontsource/noto-sans": "^5.3.0",
+    "@fontsource/noto-sans-sinhala": "^5.3.0",
+    "@fontsource/noto-sans-tamil": "^5.3.0",
+    "@journeyapps/wa-sqlite": "^2.0.10",
+    "@powersync/capacitor": "^0.10.0",
+    "@powersync/web": "^2.6.0",
+    "@supabase/supabase-js": "^2.119.0",
+    "i18next": "^27.0.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.1",
+    "serialport": "^13.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.7",
+    "cross-env": "^10.1.0",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "oxlint": "^1.90.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0",
+    "wait-on": "^9.5.1"
+  },
+  "allowScripts": {
+    "@serialport/bindings-cpp@13.0.0": true
+  },
+  "description": "Offline-first retail POS for Sri Lankan shops",
+  "author": {
+    "name": "Lanka POS",
+    "email": "tscandy886@gmail.com"
+  },
+  "main": "dist-electron/main.cjs",
+  "build": {
+    "appId": "lk.lankapos.app",
+    "productName": "Lanka POS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/linux/70-lanka-pos-printers.rules",
+        "to": "udev/70-lanka-pos-printers.rules"
+      }
+    ],
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "category": "Office",
+      "maintainer": "Lanka POS <tscandy886@gmail.com>"
+    },
+    "deb": {
+      "afterInstall": "build/linux/after-install.sh",
+      "afterRemove": "build/linux/after-remove.sh",
+      "depends": [
+        "libnss3",
+        "libgbm1"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
