@@ -21,10 +21,15 @@ codebase runs on:
 
 ```
 src/
+  auth/        sign-in, shop setup, device linking, till PIN lock
+  dashboard/   owner dashboard and sales chart
+  pos/         billing screen: cart, discounts, hold, payment
+  shell/       app frame and navigation
+  ui/          shared components; styles/ holds the design tokens
   db/          local database schema, checkout logic, Supabase sync connector
   printing/    receipt renderer (canvas → 1-bit bitmap) and ESC/POS builder
   platform/    printer access per platform (Electron, Android, browser)
-  screens/     Billing screen, Printer test screen
+  screens/     Settings, printer test, placeholder screens
   i18n/        English, Sinhala, Tamil strings
 electron/      desktop shell: window, app:// protocol, USB/serial printing
 android/       generated Capacitor Android project
@@ -38,7 +43,7 @@ tests/         unit tests (vitest)
 
 ```bash
 npm install
-npm run dev            # browser at http://localhost:5173 (demo products are added)
+npm run dev            # browser at http://localhost:5173
 npm test               # unit tests
 npm run dev:electron   # desktop app with hot reload
 ```
@@ -70,13 +75,14 @@ npm run android:sync   # build web app and copy it into android/
 npm run android:open   # open in Android Studio, then Run
 ```
 
-### Cloud sync (optional)
+### Accounts and cloud sync
 
-The app runs fully offline until this is set up.
+Without a `.env`, the app runs as an offline demo shop with no login (in development it adds demo products and sales).
 
-1. Create a Supabase project and run `supabase/migrations/*.sql`.
-2. Create a PowerSync instance connected to that database, and paste in `powersync/sync-rules.yaml`.
-3. Copy `.env.example` to `.env` and fill in the three values.
+1. **Sign-in:** create a Supabase project, run `supabase/migrations/*.sql` in order, and put the project URL and publishable key in `.env` (see `.env.example`). The app then asks the owner to sign in, set up the shop and choose a till PIN.
+2. **Sync:** create a PowerSync instance connected to that database, paste in `powersync/sync-rules.yaml`, and add `VITE_POWERSYNC_URL` to `.env`.
+
+See [PROGRESS.md](PROGRESS.md) for what's built and what's next.
 
 ⚠️ Before turning on sync, build sign-in and shop selection. Right now each device makes up a local shop ID, and the server would reject its uploads.
 
