@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { cloudConfigured } from '../db/connector'
+import { syncConfigured } from '../db/connector'
 import { db } from '../db/database'
 import { useSyncStatus } from '../db/useQuery'
 
 export type ConnectionState =
-  | { kind: 'local' } // cloud not set up yet: everything stays on this device
+  | { kind: 'local' } // sync not set up yet: everything stays on this device
   | { kind: 'online' }
   | { kind: 'syncing'; pendingBills: number }
   | { kind: 'offline'; pendingBills: number }
@@ -25,7 +25,7 @@ export function useConnection(): ConnectionState {
   const [pending, setPending] = useState(0)
 
   useEffect(() => {
-    if (!cloudConfigured) return
+    if (!syncConfigured) return
     let alive = true
     const tick = () => countPendingBills().then((n) => alive && setPending(n))
     tick()
@@ -36,7 +36,7 @@ export function useConnection(): ConnectionState {
     }
   }, [])
 
-  if (!cloudConfigured) return { kind: 'local' }
+  if (!syncConfigured) return { kind: 'local' }
   if (!status.connected) return { kind: 'offline', pendingBills: pending }
   if (pending > 0 || status.dataFlowStatus.uploading || status.dataFlowStatus.downloading) return { kind: 'syncing', pendingBills: pending }
   return { kind: 'online' }

@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Banknote, CircleCheck, CreditCard, Printer, QrCode } from 'lucide-react'
+import { useSession } from '../auth/session'
 import { completeSale, type Payment } from '../db/sales'
 import { formatLKR, toCents, type Cents } from '../lib/money'
 import { Button, Dialog, NumPad, Pill } from '../ui'
@@ -70,6 +71,7 @@ export function PaymentDialog({
 function PayBody({ cart, offline, onDone }: { cart: CartState; offline: boolean; onDone: (d: Done) => void }) {
   const { t } = useTranslation()
   const toast = useToast()
+  const { staff } = useSession()
   const { total, billDiscount } = totals(cart)
   const [method, setMethod] = useState<Method>('cash')
   const [cashRaw, setCashRaw] = useState('')
@@ -85,10 +87,10 @@ function PayBody({ cart, offline, onDone }: { cart: CartState; offline: boolean;
     setBusy(true)
     try {
       const items = toSaleItems(cart)
-      const sale = await completeSale(items, [{ method, amount: received, reference: reference.trim() || undefined }], billDiscount)
+      const sale = await completeSale(items, [{ method, amount: received, reference: reference.trim() || undefined }], billDiscount, staff?.id)
       const printer = await receiptPrinter()
       const payments = [{ method: t(`pos.method.${method}`), amount: received }]
-      const receipt = () => buildReceipt({ ...sale, items, payments })
+      const receipt = () => buildReceipt({ ...sale, items, payments, cashier: staff?.name })
 
       let drawerOpened = false
       if (printer && method === 'cash') {

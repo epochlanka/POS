@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AccountSection } from '../auth/AccountSection'
+import { supabase } from '../db/connector'
 import { getSetting, setSetting } from '../db/database'
 import { LANGUAGES } from '../i18n'
 import { Button, Segmented } from '../ui'
@@ -19,6 +21,17 @@ export function SettingsScreen() {
 
   const saveShop = async () => {
     for (const k of SHOP_FIELDS) await setSetting(k, shop[k]?.trim() ?? '')
+    // Signed-in devices also update the shop record, so other counters and
+    // new devices get the same receipt header. Owners only (RLS).
+    const signedIn = Boolean(await getSetting('account_user_id'))
+    const shopId = await getSetting('shop_id')
+    if (supabase && signedIn && shopId) {
+      const { error } = await supabase
+        .from('shops')
+        .update({ name: shop.shop_name?.trim() || undefined, address: shop.shop_address?.trim() || null, phone: shop.shop_phone?.trim() || null })
+        .eq('id', shopId)
+      if (error) return toast(t('settings.savedLocalOnly'), 'error')
+    }
     toast(t('settings.saved'))
   }
 
@@ -48,6 +61,8 @@ export function SettingsScreen() {
           </Button>
         </div>
       </section>
+
+      <AccountSection />
 
       <section className="card settings-section">
         <PrinterTestScreen />

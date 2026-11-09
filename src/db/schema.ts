@@ -8,6 +8,21 @@ import { column, Schema, Table } from '@powersync/web'
  * Must stay in step with supabase/migrations/. Money columns are integer cents.
  */
 
+/**
+ * People who use the till. Each unlocks with a PIN (hash only, see
+ * src/auth/pin.ts). Synced so every counter can unlock offline. An owner's
+ * own profile uses their account user id as its id.
+ */
+const staff = new Table({
+  shop_id: column.text,
+  user_id: column.text,
+  name: column.text,
+  role: column.text, // owner | manager | cashier
+  pin_hash: column.text,
+  is_active: column.integer,
+  created_at: column.text,
+})
+
 const categories = new Table(
   {
     shop_id: column.text,
@@ -143,6 +158,7 @@ const held_bills = new Table(
 )
 
 export const AppSchema = new Schema({
+  staff,
   categories,
   products,
   product_variants,
@@ -157,3 +173,4 @@ export const AppSchema = new Schema({
 export type Database = (typeof AppSchema)['types']
 export type ProductRow = Database['products']
 export type VariantRow = Database['product_variants']
+export type StaffRow = Database['staff']

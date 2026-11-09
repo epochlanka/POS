@@ -19,22 +19,25 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './i18n'
 import App from './App.tsx'
-import { cloudConfigured } from './db/connector'
+import { AuthGate } from './auth/AuthGate'
+import { authConfigured } from './db/connector'
 import { initDatabase } from './db/database'
 import { seedDemoData, seedDemoHistory } from './db/sales'
 
 async function start() {
   await initDatabase()
-  // Demo products only in development without a cloud backend, so they are
-  // never uploaded to a real shop's data.
-  if (import.meta.env.DEV && !cloudConfigured) {
+  // Demo products only in development without Supabase settings, so they
+  // never end up in a real shop's data.
+  if (import.meta.env.DEV && !authConfigured) {
     await seedDemoData()
     await seedDemoHistory()
   }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <App />
+      <AuthGate>
+        <App />
+      </AuthGate>
     </StrictMode>,
   )
 }

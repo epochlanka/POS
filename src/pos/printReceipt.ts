@@ -26,12 +26,14 @@ export async function buildReceipt(sale: {
   total: Cents
   payments: { method: string; amount: Cents }[]
   change: Cents
+  cashier?: string
 }): Promise<Receipt> {
   return {
     shopName: (await getSetting('shop_name')) || 'My Shop',
     shopAddress: (await getSetting('shop_address')) || undefined,
     shopPhone: (await getSetting('shop_phone')) || undefined,
     billNo: sale.billNo,
+    cashier: sale.cashier,
     date: sale.createdAt,
     lines: sale.items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.unitPrice, total: lineTotal(i.unitPrice, i.qty, i.discount) })),
     subtotal: sale.subtotal,

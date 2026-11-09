@@ -150,8 +150,18 @@ export function Dialog({
 
 /* ---------------------------------------------------------------- NumPad */
 
-/** Touch keypad that edits a decimal string. */
-export function NumPad({ value, onChange, decimals = true }: { value: string; onChange: (v: string) => void; decimals?: boolean }) {
+/** Touch keypad that edits a decimal string. `digits` keeps every key as typed (PINs: "0123"). */
+export function NumPad({
+  value,
+  onChange,
+  decimals = true,
+  digits = false,
+}: {
+  value: string
+  onChange: (v: string) => void
+  decimals?: boolean
+  digits?: boolean
+}) {
   const press = (k: string) => {
     if (k === 'back') return onChange(value.slice(0, -1))
     if (k === '.') {
@@ -160,14 +170,14 @@ export function NumPad({ value, onChange, decimals = true }: { value: string; on
     }
     const [, frac] = value.split('.')
     if (frac !== undefined && frac.length >= 3) return
-    onChange(value === '0' ? k : value + k)
+    onChange(value === '0' && !digits ? k : value + k)
   }
-  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', decimals ? '.' : '', '0', 'back']
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', decimals && !digits ? '.' : '', '0', 'back']
   return (
     <div className="numpad">
       {keys.map((k, i) =>
         k === '' ? (
-          <span key={i} />
+          <span key={`blank-${i}`} />
         ) : (
           <button key={k} type="button" onClick={() => press(k)} aria-label={k === 'back' ? 'Backspace' : k}>
             {k === 'back' ? '⌫' : k}

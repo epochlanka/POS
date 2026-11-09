@@ -151,7 +151,8 @@
     "shop_name": "Shop name",
     "shop_address": "Address",
     "shop_phone": "Phone",
-    "saved": "Saved"
+    "saved": "Saved",
+    "savedLocalOnly": "Saved on this device only — couldn't update the shop online. Check the internet and save again."
   },
   "printer": {
     "title": "Receipt printer",
@@ -241,5 +242,127 @@
     "viewTable": "View as table",
     "period": "Period",
     "sales": "Sales (LKR)"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordRule_one": "At least {{count}} character.",
+    "passwordRule_other": "At least {{count}} characters.",
+    "code": "Code from the email",
+    "needsInternet": "You're offline. Connect to the internet to sign in on this device for the first time. After that, the till works offline.",
+    "working": "Please wait…",
+    "back": "Back to sign in",
+    "retry": "Try again",
+    "signOutOther": "Use a different account",
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "Shop owners and managers sign in once on each device.",
+      "submit": "Sign in",
+      "noAccount": "New shop?",
+      "link": "Sign in"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "You'll set up your shop next. Cashiers don't need an account — they use a PIN.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "link": "Create an account"
+    },
+    "verify": {
+      "title": "Check your email",
+      "subtitle": "We sent a code to {{email}}. Enter it below.",
+      "submit": "Confirm",
+      "resend": "Send a new code",
+      "resent": "New code sent. It can take a minute to arrive.",
+      "linkHint": "Got a link instead of a code? Open it, then come back and sign in."
+    },
+    "forgot": {
+      "link": "Forgot password?",
+      "title": "Reset your password",
+      "subtitle": "We'll email you a code to set a new password.",
+      "submit": "Send code"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Enter the code we sent to {{email}}.",
+      "newPassword": "New password",
+      "submit": "Save and sign in"
+    },
+    "shop": {
+      "title": "Your shop",
+      "pickTitle": "Choose a shop",
+      "createTitle": "Set up your shop",
+      "subtitle": "Signed in as {{email}}. This device will be a counter of the shop you choose.",
+      "createNew": "Create a new shop",
+      "create": "Create shop",
+      "use": "Use this shop"
+    },
+    "role": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "cashier": "Cashier"
+    },
+    "err": {
+      "offline": "Can't reach the server. Check the internet connection and try again.",
+      "generic": "Something went wrong. Please try again.",
+      "invalid_credentials": "Wrong email or password.",
+      "email_not_confirmed": "Confirm your email first — check your inbox for the code or link.",
+      "user_already_exists": "An account with this email already exists. Sign in instead.",
+      "weak_password": "Use a longer password: at least 8 characters.",
+      "over_email_send_rate_limit": "Too many emails sent. Wait a few minutes and try again.",
+      "over_request_rate_limit": "Too many attempts. Wait a few minutes and try again.",
+      "otp_expired": "That code is wrong or has expired. Ask for a new one.",
+      "same_password": "Choose a password different from your old one.",
+      "signup_disabled": "New accounts are turned off for this system.",
+      "cashier_device": "Cashiers can't set up a device. Ask the shop owner or a manager to sign in here."
+    },
+    "pin": {
+      "entered_one": "{{count}} digit entered",
+      "entered_other": "{{count}} digits entered",
+      "setupTitle": "Set your till PIN",
+      "resetTitle": "Choose a new PIN",
+      "setupSubtitle": "You'll use it to unlock the till at {{shop}}, even offline.",
+      "yourName": "Your name",
+      "nameHint": "Printed on receipts as the cashier.",
+      "needName": "Enter your name.",
+      "choose": "Choose a {{min}}–{{max}} digit PIN",
+      "again": "Enter the same PIN again",
+      "rule": "The PIN must be {{min}}–{{max}} digits.",
+      "mismatch": "The PINs didn't match. Start again.",
+      "next": "Next",
+      "save": "Save PIN"
+    },
+    "lock": {
+      "title": "Unlock the till",
+      "subtitle": "Counter {{counter}} · Choose your name and enter your PIN.",
+      "who": "Who's at the till?",
+      "enterPin": "PIN for {{name}}",
+      "unlock": "Unlock",
+      "wrong_one": "Wrong PIN. {{count}} try left.",
+      "wrong_other": "Wrong PIN. {{count}} tries left.",
+      "tooMany": "Too many wrong PINs. Wait {{count}} seconds.",
+      "wait_one": "Try again in {{count}} second.",
+      "wait_other": "Try again in {{count}} seconds.",
+      "forgot": "Forgot PIN?",
+      "askOwner": "Forgot your PIN? Ask the owner to reset it.",
+      "forgotTitle": "Reset your PIN",
+      "forgotBody": "Enter the password for {{email}} to choose a new PIN. This needs the internet.",
+      "forgotSubmit": "Continue",
+      "action": "Lock",
+      "actionAs": "Lock · {{name}}"
+    },
+    "account": {
+      "title": "Account",
+      "shop": "Shop",
+      "counter": "This counter",
+      "signOut": "Sign out of this device",
+      "signOutTitle": "Sign out of this device?",
+      "signOutBody": "This removes the shop's data from this device. To use it again, an owner or manager has to sign in.",
+      "signOutConfirm": "Sign out and remove data",
+      "unsynced_one": "{{count}} change on this device hasn't reached the cloud yet and will be lost.",
+      "unsynced_other": "{{count}} changes on this device haven't reached the cloud yet and will be lost."
+    }
   }
 }

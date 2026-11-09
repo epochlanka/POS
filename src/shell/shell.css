@@ -53,14 +53,33 @@
 .rail__item[aria-current='page'] { background: var(--brand); color: #fff; }
 
 @media (min-width: 900px) {
-  .rail { display: block; }
+  .rail { display: flex; flex-direction: column; }
 }
+
+/* Who is at the till, and the Lock button, pinned to the bottom of the rail. */
+.rail__user { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--side-hover); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.rail__avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--side-hover);
+  color: #fff;
+  font-weight: 700;
+}
+.rail__who { display: flex; flex-direction: column; min-width: 0; flex: 1; font-size: 0.85rem; line-height: 1.3; }
+.rail__who strong { color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail__lock { flex-basis: 100%; }
 
 /* Touch PCs and small laptops: icon-only rail gives the POS more room. */
 @media (min-width: 900px) and (max-width: 1199px) {
   .rail { width: var(--rail-width-compact); padding: 16px 10px; }
   .rail__name,
+  .rail__who,
   .rail__item span { display: none; }
+  .rail__user { justify-content: center; }
   .rail__brand { justify-content: center; padding: 4px 0 20px; }
   .rail__item { justify-content: center; padding: 0; }
 }
@@ -117,6 +136,7 @@
   text-align: left;
   cursor: pointer;
 }
+.more-list__user { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .more-list__item:hover,
 .more-list__item[aria-current='page'] { background: var(--brand-soft); color: var(--brand); }
 

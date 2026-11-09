@@ -1,6 +1,6 @@
 import { PowerSyncDatabase } from '@powersync/capacitor'
 import { newId } from '../lib/ids'
-import { cloudConfigured, supabase, SupabaseConnector } from './connector'
+import { supabase, SupabaseConnector, syncConfigured } from './connector'
 import { AppSchema } from './schema'
 
 // On Android this uses native SQLite; in the browser and in Electron it uses
@@ -27,9 +27,9 @@ export interface DeviceContext {
 }
 
 /**
- * Identity of this device. Until sign-up exists, a local shop is created so
- * the app works with no account. TODO: replace with the shop/branch the user
- * picks after logging in, and a prefix (C1, C2...) assigned by the server.
+ * Identity of this device. Signed-in devices get these from linkDevice()
+ * (src/auth/account.ts). In offline demo mode (no Supabase settings) a local
+ * shop is made up on first use.
  */
 export async function deviceContext(): Promise<DeviceContext> {
   const ensure = async (key: string, make: () => string) => {
@@ -48,9 +48,12 @@ export async function deviceContext(): Promise<DeviceContext> {
   }
 }
 
+/** Starts syncing if the cloud is set up. Safe to call again after sign-in. */
+export async function connectSync(): Promise<void> {
+  if (syncConfigured && supabase) await db.connect(new SupabaseConnector(supabase))
+}
+
 export async function initDatabase(): Promise<void> {
   await db.init()
-  if (cloudConfigured && supabase) {
-    await db.connect(new SupabaseConnector(supabase))
-  }
+  await connectSync()
 }
