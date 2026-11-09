@@ -1,0 +1,56 @@
+/*
+ * Design tokens, taken from design/ui-concepts/00-Overview-Design-System.png.
+ * Use these variables everywhere instead of raw colours or sizes.
+ */
+:root {
+  /* Colour */
+  --brand: #0e6b5f; /* actions */
+  --brand-hover: #0b5a50;
+  --brand-soft: #e2f1ec;
+  --side: #10201d; /* navigation rail */
+  --side-text: #c9d6d2;
+  --side-hover: #1b302c;
+  --ground: #f3f5f4; /* page background */
+  --surface: #ffffff;
+  --text: #13201d;
+  --text-muted: #5f6b68;
+  --border: #dde3e1;
+  --border-strong: #c3ccc9;
+
+  --warning-bg: #fdf0dc; /* low stock, offline */
+  --warning-text: #95560f;
+  --danger: #b42318; /* out, expired, void */
+  --danger-bg: #fce4e2;
+  --info-bg: #e5ecfa; /* pending, sync */
+  --info-text: #2f5bb7;
+  --success-bg: #e2f1ec;
+  --success-text: #0e6b5f;
+  --neutral-bg: #eceeed;
+
+  /* Charts: one hue. The current period is the accent; past periods are a
+     lighter step of the same green (validated: 2.25:1 on white, ≥ 2:1 floor). */
+  --chart-current: #0e6b5f;
+  --chart-past: #7ab9aa;
+  --chart-grid: #e6ebe9;
+  --chart-track: #e2f1ec;
+
+  /* Type: Space Grotesk for headings and money, Inter for everything else.
+     Noto covers Sinhala and Tamil, which neither font has. */
+  --font-display: 'Space Grotesk', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  --font-body: 'Inter', 'Noto Sans Sinhala', 'Noto Sans Tamil', system-ui, sans-serif;
+
+  /* Touch targets: 44px minimum, 56px on the POS keypad and cart. */
+  --touch: 44px;
+  --touch-pos: 56px;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 2px rgb(16 32 29 / 0.06), 0 1px 1px rgb(16 32 29 / 0.04);
+  --shadow-lg: 0 12px 40px rgb(16 32 29 / 0.18);
+
+  /* Navigation switches from side rail to bottom bar below 900px. */
+  --rail-width: 220px;
+  --rail-width-compact: 72px;
+  --bottom-bar-height: 64px;
+}

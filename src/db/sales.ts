@@ -1,6 +1,6 @@
 import { formatBillNo, newId } from '../lib/ids'
 import { lineTotal, type Cents } from '../lib/money'
-import { db, deviceContext } from './database'
+import { db, deviceContext, getSetting } from './database'
 
 export interface CartItem {
   variantId: string
@@ -78,39 +78,124 @@ export async function completeSale(items: CartItem[], payments: Payment[], billD
   return { saleId, billNo, subtotal, discount, total, change: paid - total, createdAt: new Date(now) }
 }
 
-/** Demo products for development, so the POS screen has something to sell. */
+/** Demo catalogue for development, so the POS screen has something to sell. */
 export async function seedDemoData() {
-  const existing = await db.get<{ n: number }>('SELECT COUNT(*) AS n FROM products')
+  const existing = await db.get<{ n: number }>('SELECT COUNT(*) AS n FROM categories')
   if (existing.n > 0) return
   const ctx = await deviceContext()
   const now = new Date().toISOString()
-  const demo: [string, string, string, string, number, number, number][] = [
-    // name, sinhala, tamil, barcode, cost, price, opening stock
-    ['Full Cream Milk Powder 400g', 'කිරිපිටි 400g', 'பால் மா 400g', '4792000000011', 98000, 112000, 24],
-    ['Basmati Rice 1kg', 'බාස්මතී සහල් 1kg', 'பாஸ்மதி அரிசி 1kg', '4792000000028', 52000, 61000, 40],
-    ['Ceylon Tea 200g', 'තේ 200g', 'தேநீர் 200g', '4792000000035', 68000, 79000, 30],
-    ['Coconut Oil 750ml', 'පොල්තෙල් 750ml', 'தேங்காய் எண்ணெய் 750ml', '4792000000042', 61000, 72000, 18],
-    ['Dhal 500g', 'පරිප්පු 500g', 'பருப்பு 500g', '4792000000059', 19000, 23500, 50],
-    ['Sugar 1kg', 'සීනි 1kg', 'சீனி 1kg', '4792000000066', 24000, 28000, 3],
+
+  const categories: [string, string, string][] = [
+    ['Grocery', 'සිල්ලර', 'மளிகை'],
+    ['Drinks', 'බීම', 'பானங்கள்'],
+    ['Snacks', 'කෙටි කෑම', 'சிற்றுண்டி'],
+    ['Household', 'ගෘහ භාණ්ඩ', 'வீட்டுப் பொருட்கள்'],
+    ['Cosmetics', 'රූපලාවන්ය', 'அழகுசாதனம்'],
   ]
+  // name, sinhala, tamil, category, barcode, cost, price (cents), opening stock
+  const products: [string, string, string, string, string, number, number, number][] = [
+    ['Red Dhal 1kg', 'රතු පරිප්පු 1kg', 'சிவப்பு பருப்பு 1kg', 'Grocery', '4790123000112', 36000, 42000, 6],
+    ['Coconut Oil 1L', 'පොල්තෙල් 1L', 'தேங்காய் எண்ணெய் 1L', 'Grocery', '4790123000129', 74000, 85000, 22],
+    ['Basmati Rice 5kg', 'බාස්මතී සහල් 5kg', 'பாஸ்மதி அரிசி 5kg', 'Grocery', '4790123000136', 215000, 245000, 64],
+    ['Sugar 1kg', 'සීනි 1kg', 'சீனி 1kg', 'Grocery', '4790123000143', 26000, 30000, 0],
+    ['Tea Leaves 200g', 'තේ කොළ 200g', 'தேயிலை 200g', 'Drinks', '4790123000150', 33000, 39000, 40],
+    ['Soft Drink 1.5L', 'බීම 1.5L', 'குளிர்பானம் 1.5L', 'Drinks', '4790123000167', 35000, 42000, 35],
+    ['Fresh Milk 1L', 'දියර කිරි 1L', 'பால் 1L', 'Drinks', '4790123000174', 49000, 56000, 8],
+    ['Biscuits 200g', 'බිස්කට් 200g', 'பிஸ்கட் 200g', 'Snacks', '4790123000181', 27000, 32000, 51],
+    ['Murukku 100g', 'මුරුක්කු 100g', 'முறுக்கு 100g', 'Snacks', '4790123000198', 14000, 18000, 27],
+    ['Soap Bar 100g', 'සබන් 100g', 'சோப்பு 100g', 'Household', '4790123000204', 9000, 11000, 86],
+    ['Dishwash 500ml', 'පිඟන් සෝදන දියර 500ml', 'பாத்திரம் கழுவும் திரவம் 500ml', 'Household', '4790123000211', 40000, 48000, 12],
+    ['Face Cream 50g', 'මුහුණු ක්‍රීම් 50g', 'முகக் கிரீம் 50g', 'Cosmetics', '4790123000228', 78000, 95000, 4],
+  ]
+
   await db.writeTransaction(async (tx) => {
-    for (const [name, si, ta, barcode, cost, price, stock] of demo) {
+    const catIds = new Map<string, string>()
+    for (const [i, [name, si, ta]] of categories.entries()) {
+      const id = newId()
+      catIds.set(name, id)
+      await tx.execute(
+        'INSERT INTO categories (id, shop_id, name, name_si, name_ta, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+        [id, ctx.shopId, name, si, ta, i],
+      )
+    }
+    for (const [name, si, ta, cat, barcode, cost, price, stock] of products) {
       const productId = newId()
       const variantId = newId()
       await tx.execute(
-        `INSERT INTO products (id, shop_id, name, name_si, name_ta, tracks_batches, is_active, created_at) VALUES (?, ?, ?, ?, ?, 0, 1, ?)`,
-        [productId, ctx.shopId, name, si, ta, now],
+        `INSERT INTO products (id, shop_id, category_id, name, name_si, name_ta, tracks_batches, is_active, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, 0, 1, ?)`,
+        [productId, ctx.shopId, catIds.get(cat), name, si, ta, now],
       )
       await tx.execute(
         `INSERT INTO product_variants (id, shop_id, product_id, label, barcode, cost_price, sell_price, low_stock_level, is_active)
-         VALUES (?, ?, ?, '', ?, ?, ?, 5, 1)`,
+         VALUES (?, ?, ?, '', ?, ?, ?, 10, 1)`,
         [variantId, ctx.shopId, productId, barcode, cost, price],
       )
-      await tx.execute(
-        `INSERT INTO stock_movements (id, shop_id, branch_id, variant_id, qty, kind, unit_cost, device_id, created_at)
-         VALUES (?, ?, ?, ?, ?, 'opening', ?, ?, ?)`,
-        [newId(), ctx.shopId, ctx.branchId, variantId, stock, cost, ctx.deviceId, now],
-      )
+      if (stock > 0) {
+        await tx.execute(
+          `INSERT INTO stock_movements (id, shop_id, branch_id, variant_id, qty, kind, unit_cost, device_id, created_at)
+           VALUES (?, ?, ?, ?, ?, 'opening', ?, ?, ?)`,
+          [newId(), ctx.shopId, ctx.branchId, variantId, stock, cost, ctx.deviceId, now],
+        )
+      }
     }
+  })
+}
+
+/**
+ * Demo sales history (about 13 months) so the dashboard charts have data in
+ * development. Development only, never with a cloud backend. These demo
+ * bills don't write stock movements, so stock counts aren't reduced by them.
+ */
+export async function seedDemoHistory() {
+  if (await getSetting('demo_history_v1')) return
+  const ctx = await deviceContext()
+  const variants = await db.getAll<{ id: string; name: string; sell_price: number; cost_price: number }>(
+    'SELECT v.id, p.name, v.sell_price, v.cost_price FROM product_variants v JOIN products p ON p.id = v.product_id',
+  )
+  if (variants.length === 0) return
+
+  // Small seeded random generator so every developer sees the same history.
+  let seed = 42
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296)
+  const pick = <T,>(xs: T[]) => xs[Math.floor(rand() * xs.length)]
+  const methods = ['cash', 'cash', 'cash', 'card', 'lankaqr'] as const
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  let n = 0
+  await db.writeTransaction(async (tx) => {
+    for (let daysAgo = 400; daysAgo >= 1; daysAgo--) {
+      const day = new Date(today)
+      day.setDate(day.getDate() - daysAgo)
+      const weekend = day.getDay() === 0 || day.getDay() === 6
+      const growth = 1 + (400 - daysAgo) / 400 // the shop grows over the year
+      const bills = Math.round((3 + rand() * 5) * growth * (weekend ? 1.4 : 1))
+      for (let b = 0; b < bills; b++) {
+        const at = new Date(day)
+        at.setHours(7 + Math.floor(rand() * 14), Math.floor(rand() * 60))
+        const saleId = newId()
+        const lines = Array.from({ length: 1 + Math.floor(rand() * 3) }, () => ({ v: pick(variants), qty: 1 + Math.floor(rand() * 2) }))
+        const total = lines.reduce((s, l) => s + l.v.sell_price * l.qty, 0)
+        n++
+        await tx.execute(
+          `INSERT INTO sales (id, shop_id, branch_id, device_id, bill_no, subtotal, discount, total, status, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'completed', ?)`,
+          [saleId, ctx.shopId, ctx.branchId, ctx.deviceId, `DEMO-${String(n).padStart(5, '0')}`, total, total, at.toISOString()],
+        )
+        for (const l of lines) {
+          await tx.execute(
+            `INSERT INTO sale_lines (id, shop_id, sale_id, variant_id, name, qty, unit_price, unit_cost, discount, total)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+            [newId(), ctx.shopId, saleId, l.v.id, l.v.name, l.qty, l.v.sell_price, l.v.cost_price, l.v.sell_price * l.qty],
+          )
+        }
+        await tx.execute(
+          'INSERT INTO sale_payments (id, shop_id, sale_id, method, amount, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+          [newId(), ctx.shopId, saleId, pick([...methods]), total, at.toISOString()],
+        )
+      }
+    }
+    await tx.execute("INSERT OR REPLACE INTO device_settings (id, value) VALUES ('demo_history_v1', '1')")
   })
 }

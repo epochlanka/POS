@@ -8,6 +8,7 @@ bucket_definitions:
   shop_data:
     parameters: SELECT shop_id FROM shop_members WHERE user_id = request.user_id()
     data:
+      - SELECT * FROM categories WHERE shop_id = bucket.shop_id
       - SELECT * FROM products WHERE shop_id = bucket.shop_id
       - SELECT * FROM product_variants WHERE shop_id = bucket.shop_id
       - SELECT * FROM stock_movements WHERE shop_id = bucket.shop_id

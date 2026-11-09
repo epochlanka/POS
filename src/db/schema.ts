@@ -8,6 +8,17 @@ import { column, Schema, Table } from '@powersync/web'
  * Must stay in step with supabase/migrations/. Money columns are integer cents.
  */
 
+const categories = new Table(
+  {
+    shop_id: column.text,
+    name: column.text,
+    name_si: column.text,
+    name_ta: column.text,
+    sort_order: column.integer, // owner sets the order of the POS chips
+  },
+  { indexes: { by_order: ['sort_order'] } },
+)
+
 const products = new Table(
   {
     shop_id: column.text,
@@ -114,7 +125,25 @@ const device_settings = new Table(
   { localOnly: true },
 )
 
+/**
+ * Bills parked so the cashier can serve the next customer. Kept on this
+ * device only (they belong to this counter), and survive restarts.
+ */
+const held_bills = new Table(
+  {
+    label: column.text, // H-01
+    note: column.text, // "Blue shirt man"
+    cart_json: column.text,
+    total: column.integer,
+    item_count: column.integer,
+    held_by: column.text,
+    created_at: column.text,
+  },
+  { localOnly: true },
+)
+
 export const AppSchema = new Schema({
+  categories,
   products,
   product_variants,
   stock_movements,
@@ -122,6 +151,7 @@ export const AppSchema = new Schema({
   sale_lines,
   sale_payments,
   device_settings,
+  held_bills,
 })
 
 export type Database = (typeof AppSchema)['types']

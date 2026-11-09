@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getSetting, setSetting } from '../db/database'
 import { toCents } from '../lib/money'
 import { currentPlatform, printerTransport, type PrinterInfo } from '../platform'
 import { EscPosBuilder } from '../printing/escpos'
 import { renderReceipt, type PaperWidth, type Receipt } from '../printing/receipt'
+import { Button, Pill, Segmented } from '../ui'
+import { useToast } from '../ui/toast'
 
 // Phase 0 check: mixed English / Sinhala / Tamil text, printed as an image.
 const sampleReceipt = (): Receipt => ({
@@ -26,15 +29,25 @@ const sampleReceipt = (): Receipt => ({
   footer: 'ස්තූතියි! නැවත එන්න · நன்றி! மீண்டும் வருக · Thank you!',
 })
 
+/** Receipt printer setup: find a printer, test it, and use it for receipts. */
 export function PrinterTestScreen() {
   const { t } = useTranslation()
+  const toast = useToast()
   const platform = currentPlatform()
   const transport = printerTransport()
   const [printers, setPrinters] = useState<PrinterInfo[] | null>(null)
   const [selected, setSelected] = useState('')
   const [width, setWidth] = useState<PaperWidth>(384)
-  const [status, setStatus] = useState('')
+  const [saved, setSaved] = useState<string | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    Promise.all([getSetting('printer_id'), getSetting('paper_width')]).then(([id, w]) => {
+      setSaved(id || null)
+      if (id) setSelected(id)
+      if (w) setWidth(Number(w) as PaperWidth)
+    })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -49,19 +62,18 @@ export function PrinterTestScreen() {
   }, [width])
 
   const scan = async () => {
-    setStatus('')
     try {
       const list = await transport.listPrinters()
       setPrinters(list)
-      if (list[0]) setSelected(list[0].id)
+      if (list.length && !list.some((p) => p.id === selected)) setSelected(list[0].id)
     } catch (e) {
-      setStatus((e as Error).message)
+      toast((e as Error).message, 'error')
     }
   }
 
   const send = async (withReceipt: boolean) => {
-    setStatus('')
     try {
+      await transport.listPrinters()
       const b = new EscPosBuilder().init()
       if (withReceipt) {
         const { bitmap } = await renderReceipt(sampleReceipt(), width)
@@ -70,10 +82,17 @@ export function PrinterTestScreen() {
         b.openDrawer()
       }
       await transport.print(selected, b.build())
-      setStatus(t('printer.printed'))
+      toast(t('printer.printed'))
     } catch (e) {
-      setStatus((e as Error).message)
+      toast((e as Error).message, 'error')
     }
+  }
+
+  const useForReceipts = async () => {
+    await setSetting('printer_id', selected)
+    await setSetting('paper_width', String(width))
+    setSaved(selected)
+    toast(t('printer.savedDefault'))
   }
 
   return (
@@ -81,32 +100,53 @@ export function PrinterTestScreen() {
       <div className="printer-controls">
         <h2>{t('printer.title')}</h2>
         <p className="muted">{t('printer.intro')}</p>
-        {platform === 'web' && <p className="message">{t('printer.webOnly')}</p>}
+        {platform === 'web' && <p className="notice notice--info">{t('printer.webOnly')}</p>}
+        {saved && (
+          <p>
+            <Pill tone="success" dot>
+              {t('printer.current', { id: saved })}
+            </Pill>
+          </p>
+        )}
 
-        <label>
-          {t('printer.paper')}{' '}
-          <select value={width} onChange={(e) => setWidth(Number(e.target.value) as PaperWidth)}>
-            <option value={384}>58 mm</option>
-            <option value={576}>80 mm</option>
-          </select>
-        </label>
+        <div className="field">
+          <span className="field__label">{t('printer.paper')}</span>
+          <Segmented<string>
+            value={String(width)}
+            onChange={(w) => setWidth(Number(w) as PaperWidth)}
+            options={[
+              { value: '384', label: '58 mm' },
+              { value: '576', label: '80 mm' },
+            ]}
+          />
+        </div>
 
-        <button onClick={scan} disabled={platform === 'web'}>{t('printer.scan')}</button>
+        <Button onClick={scan} disabled={platform === 'web'}>
+          {t('printer.scan')}
+        </Button>
         {printers?.length === 0 && <p className="muted">{t('printer.none')}</p>}
         {printers && printers.length > 0 && (
-          <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+          <select value={selected} onChange={(e) => setSelected(e.target.value)} aria-label={t('printer.title')}>
             {printers.map((p) => (
-              <option key={p.id} value={p.id}>{p.label}</option>
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
             ))}
           </select>
         )}
-        <div className="pay-buttons">
-          <button className="primary" disabled={!selected} onClick={() => send(true)}>{t('printer.print')}</button>
-          <button disabled={!selected} onClick={() => send(false)}>{t('printer.drawer')}</button>
+        <div className="printer-actions">
+          <Button variant="primary" disabled={!selected} onClick={() => send(true)}>
+            {t('printer.print')}
+          </Button>
+          <Button disabled={!selected} onClick={() => send(false)}>
+            {t('printer.drawer')}
+          </Button>
+          <Button disabled={!selected || selected === saved} onClick={useForReceipts}>
+            {t('printer.useForReceipts')}
+          </Button>
         </div>
-        {status && <p className="message">{status}</p>}
       </div>
-      <div ref={previewRef} className="receipt-paper" />
+      <div ref={previewRef} className="receipt-paper" aria-label={t('printer.preview')} />
     </div>
   )
 }

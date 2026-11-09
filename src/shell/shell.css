@@ -1,0 +1,128 @@
+.shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.shell__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------- Side rail */
+.rail {
+  display: none;
+  flex: none;
+  width: var(--rail-width);
+  background: var(--side);
+  color: var(--side-text);
+  padding: 16px 12px;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+}
+.rail ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.rail__brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 20px; color: #fff; }
+.rail__logo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--brand);
+}
+.rail__name { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+.rail__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--touch);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.rail__item:hover { background: var(--side-hover); color: #fff; }
+.rail__item[aria-current='page'] { background: var(--brand); color: #fff; }
+
+@media (min-width: 900px) {
+  .rail { display: block; }
+}
+
+/* Touch PCs and small laptops: icon-only rail gives the POS more room. */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .rail { width: var(--rail-width-compact); padding: 16px 10px; }
+  .rail__name,
+  .rail__item span { display: none; }
+  .rail__brand { justify-content: center; padding: 4px 0 20px; }
+  .rail__item { justify-content: center; padding: 0; }
+}
+
+/* ---------------------------------------------------------------- Bottom bar */
+.bottombar {
+  position: fixed;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: calc(var(--bottom-bar-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.bottombar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bottombar__item[aria-current='page'] { color: var(--brand); }
+.bottombar__item[aria-current='page'] svg { background: var(--brand-soft); border-radius: 999px; padding: 2px 10px; box-sizing: content-box; }
+
+.shell__main { padding-bottom: calc(var(--bottom-bar-height) + env(safe-area-inset-bottom)); }
+
+@media (min-width: 900px) {
+  .bottombar { display: none; }
+  .shell__main { padding-bottom: 0; }
+}
+
+.more-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.more-list__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: var(--touch-pos);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.more-list__item:hover,
+.more-list__item[aria-current='page'] { background: var(--brand-soft); color: var(--brand); }
+
+/* ---------------------------------------------------------------- Page header (non-POS screens) */
+.page { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; max-width: 1200px; width: 100%; }
+.page__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+@media (min-width: 900px) {
+  .page { padding: 24px 32px; }
+}

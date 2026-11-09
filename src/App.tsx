@@ -1,44 +1,31 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { cloudConfigured } from './db/connector'
-import { useSyncStatus } from './db/useQuery'
-import { LANGUAGES } from './i18n'
-import { PosScreen } from './screens/PosScreen'
-import { PrinterTestScreen } from './screens/PrinterTestScreen'
-
-type Screen = 'pos' | 'printer'
-
-function SyncBadge() {
-  const { t } = useTranslation()
-  const status = useSyncStatus()
-  if (!cloudConfigured) return <span className="badge">{t('status.local')}</span>
-  if (!status.connected) return <span className="badge warn">{t('status.offline')}</span>
-  if (status.dataFlowStatus.uploading || status.dataFlowStatus.downloading) return <span className="badge">{t('status.syncing')}</span>
-  return <span className="badge ok">{t('status.synced')}</span>
-}
+import { DashboardScreen } from './dashboard/DashboardScreen'
+import { PosScreen } from './pos/PosScreen'
+import { ComingSoon } from './screens/ComingSoon'
+import { SettingsScreen } from './screens/SettingsScreen'
+import { AppShell } from './shell/AppShell'
+import type { ScreenId } from './shell/nav'
+import { useConnection } from './shell/useConnection'
+import { ToastProvider } from './ui/toast'
+import './screens/screens.css'
 
 export default function App() {
-  const { t, i18n } = useTranslation()
-  const [screen, setScreen] = useState<Screen>('pos')
+  const [screen, setScreen] = useState<ScreenId>('pos')
+  const connection = useConnection()
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <strong className="brand">Lanka POS</strong>
-        <nav>
-          <button className={screen === 'pos' ? 'tab active' : 'tab'} onClick={() => setScreen('pos')}>{t('nav.pos')}</button>
-          <button className={screen === 'printer' ? 'tab active' : 'tab'} onClick={() => setScreen('printer')}>{t('nav.printer')}</button>
-        </nav>
-        <div className="topbar-right">
-          <SyncBadge />
-          <select value={i18n.language} onChange={(e) => i18n.changeLanguage(e.target.value)} aria-label="Language">
-            {LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>{l.label}</option>
-            ))}
-          </select>
-        </div>
-      </header>
-      <main>{screen === 'pos' ? <PosScreen /> : <PrinterTestScreen />}</main>
-    </div>
+    <ToastProvider>
+      <AppShell screen={screen} onNavigate={setScreen}>
+        {screen === 'pos' ? (
+          <PosScreen connection={connection} />
+        ) : screen === 'dashboard' ? (
+          <DashboardScreen connection={connection} onNavigate={setScreen} />
+        ) : screen === 'settings' ? (
+          <SettingsScreen />
+        ) : (
+          <ComingSoon screen={screen} onOpenPos={() => setScreen('pos')} />
+        )}
+      </AppShell>
+    </ToastProvider>
   )
 }
